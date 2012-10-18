@@ -1,0 +1,3 @@
+FNG stadium	21/12/2012	italia	paraguay	3	0	30000
+Green point stadium	21/11/2012	slovacchia	nuova zelanda	4	3	23456
+Moses Mabhida Stadium	11/12/2012	italia	nuova zelanda	7	0	1234567

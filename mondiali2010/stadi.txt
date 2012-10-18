@@ -1,0 +1,5 @@
+FNG stadium	Johahannesburg	88460
+Green point stadium	Citta del Capo	64100
+Moses Mabhida Stadium	Durban	62760
+Ellis Parcys Stadium	Johahannesburg	55686
+Loftus Versfeld Stadium	Pretoria	42858
