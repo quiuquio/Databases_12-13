@@ -1,0 +1,443 @@
+\documentclass[italian]{amsart}
+
+
+\usepackage{babel,amssymb,booktabs}
+\usepackage{amsfonts}
+\usepackage{latexsym}
+\usepackage{algorithm,algorithmic}
+
+
+\begin{document}
+\title{Algebra relazionale e gestione dei valori NULL}
+\author{Appunti di Robert Parcus \texttt{betoparcus@gmail.com}}
+\date{10 ottobre 2012}
+\maketitle
+2012/10/16 - Algebra relazionale 
+
+\section{La divisione}
+
+Indicato pi\'u intuitivamente controparte della quantificazione universale. \\
+Esempio: Date due relazioni \\*
+
+ISCRIZIONE:
+\begin{tabular}{|c|c|}
+\hline 
+matricola & id\_corso \\ 
+\hline 
+123 & BD \\ 
+\hline 
+283 & BD \\ 
+\hline 
+123 & INF \\ 
+\hline 
+123 & MAT \\ 
+\hline 
+283 & MAT \\ 
+\hline 
+375 & BD \\ 
+\hline 
+283 & INF \\ 
+\hline 
+\end{tabular} 
+CORSO:
+\begin{tabular}{|c|}
+\hline 
+id\_corso \\ 
+\hline 
+BD \\ 
+\hline 
+INF \\ 
+\hline 
+MAT \\ 
+\hline 
+\end{tabular} 
+
+$R \leftarrow ISCRIZIONE \div CORSO $  \\*
+(mi dar\'a le matricole iscritte a tutti i corsi appartenenti a CORSO)
+
+R: \begin{tabular}{|c|c|}
+\hline 
+123 & 283 \\
+\hline 
+\end{tabular} 
+\\*
+Vediamo come si pu\'o derivare la divisione dalle altre operazioni che conosciamo:\\*
+
+Definizione $[DIVISIONE]$ : Siano $R1(x), R2(y)$ due schemi di relazione t.c. $Y$ appartiene a $X$ e siano
+$r1, r2$ due istanze di $R1R2$. L'operatore divisione produce una relazione le cui tuple, se estese con
+una qualunque tupla della seconda relazione producono una tupla di $R1$.\\
+$r1 \div r2 = \lbrace\, t\, \vert\, \forall \, t' \in r2, \; t \cup t \in r1 \,\rbrace$ \\*
+
+
+La divisione $r1 \div r2$ \'e  dunque un operatore definito sullo schema con attributi $X - Y$.
+E' un operatore derivato e pu\'o essere definito come:\\*
+$T1 \leftarrow \Pi _{x-y}(R1)$\\*
+$T2 \leftarrow \Pi _{x-y}(R2 \times T1)-R1)$\\*
+
+Sull'esempio di prima:\\*
+$T1 \leftarrow \Pi _{\textit{matricola}}(\textit{Iscrizione})$\\*
+$T2 \leftarrow \Pi _{\textit{matricola}}((T1 \times \textit{corso})-R1)$\\*
+$R \leftarrow \textit{T1T2}$\\*
+
+
+\section{ALGEBRA RELAZIONE E VALORI NULL}
+
+La presenza di valori nulli nelle istanze di una base di dati richiede un'estensione della semantica degli operatori dell'algebra relazionale. L'approccio tradizionale  (usato anche nei DBMS commerciali ed in SQL) \'e quello di considerare una logica a 3 valori per la valutazione delle formule proposizionali e quei nodi degli operatori di Selezione e Join.\\*
+
+\textbf{Proiezione, unione, differenza con valori nulli:\\}
+\begin{center}
+Continuano a comportarsi usualmente. L'uguaglianza tra NULL \'e un livello sintattico e due tuple sono sono uguali anche se ci sono valori NULL.\\*
+\end{center}
+
+Esempio:
+
+IMPIEGATI:
+	\begin{tabular}{|c|c|c|}
+	\hline 
+	codice & nome & ufficio \\ 
+	\hline 
+	123 & Rossi & A12 \\ 
+	\hline 
+	231 & Verdi & NULL \\ 
+	\hline 
+	373 & Verdi & A27 \\ 
+	\hline 
+	435 & Verdi & NULL \\ 
+	\hline 
+	\end{tabular} 
+Responsabili:
+	\begin{tabular}{|c|c|c|}
+	\hline 
+	codice & nome & ufficio \\ 
+	\hline 
+	123 & Rossi & A12 \\ 
+	\hline 
+	NULL & NULL & NULL \\ 
+	\hline 
+	435 & Verdi & A27 \\ 
+	\hline 
+	\end{tabular} 
+
+manca roba...
+
+\textbf{Selezione e valori nulli:\\}
+
+Per la selezione, il problema \'e stabilire se in presenza di valori NULL un predicato \'e vero o meno.\\*
+
+IMPIEGATI:
+\begin{tabular}{|c|c|c|c|}
+\hline 
+codice & nome & ufficio & risultato \\ 
+\hline 
+123 & Rossi & A12 & OK \\ 
+\hline 
+231 & Verdi & NULL & ??? \\ 
+\hline 
+373 & Verdi & A27 & OK \\*
+\hline 
+\end{tabular}
+\\
+$\Pi _{ \textit{ufficio='A12'} }(\textit{IMPIEGATI})$\\*
+
+La seconda tupla fa parte del risultato?\\
+\textit{Non si pu\'o sapere.}\\*
+Vanno definite politiche di gestione del NULL:\\*
+
+Per verificare predicati come quelli dell'esempio precedente, si introduce una logica a 3 valori, dove oltre al valore V ed F si ha un terzo valore '?'.\\*
+
+\begin{tabular}{|c|c|}
+\hline 
+a=a & V \\ 
+\hline 
+a=b & F \\ 
+\hline 
+a=NULL & ? \\ 
+\hline
+NULL=NULL & ? \\
+\hline 
+a!=a & F \\ 
+\hline 
+a!=b & V \\ 
+\hline 
+a!=null & ? \\ 
+\hline 
+null!=null & ? \\ 
+\hline 
+\end{tabular} 
+
+Queste tabelle di verit\'a possono essere estese ad altri tipi di confronto,. Se D \'e un dominio su cui \'e definito un ordinamento $< (>,>=, <=)$, allora per 'e' appartenente ${<,> =}$ il confronto x e y \'e indefinito se x o y sono NULL.
+Le tabelle di verit\'a   nella logica a 3 valori per gli operatori booleani sono:\\
+
+NOT:
+\begin{tabular}{|c|c|}
+\hline 
+V & F \\ 
+\hline 
+F & V \\ 
+\hline 
+? & ? \\ 
+\hline 
+\end{tabular} 
+AND:
+\begin{tabular}{|c|c|}
+\hline 
+V & V F ? \\ 
+\hline 
+F & F F F \\ 
+\hline 
+? & ? F ? \\ 
+\hline 
+\end{tabular} 
+OR:
+\begin{tabular}{|c|c|}
+\hline 
+V & V V V \\ 
+\hline 
+F & V F ? \\ 
+\hline 
+? & V ? ? \\*
+\hline 
+\end{tabular} 
+
+Una selezione $G(f)$ produce le sole tuple per cui la condizione di selezione risulti true.\\
+Esempio:
+	$\sigma _{ \textit{ufficio='A12' OR uffizio != 'A12'}} (\textit{IMPIEGATI})$
+Non restituisce tutte le tuple!!!
+Per lavorare esplicitamente con i valori nulli si introducono le condizioni  atomiche:\\
+\begin{itemize}
+	\item[$\bullet$] a IS NULL;
+	\item[$\bullet$] a IS NOT NULL;
+\end{itemize}
+$ \sigma _{(ufficio = 'A12' || ufficio != 'A12' || ufficio IS NULL)} (IMPIEGATI)$\\
+
+\textbf{JOIN CON VALORI NULL:}\\*
+
+Valgono le stesse regole di valutazione per F utilizzate nella selezione. Il JOIN NATURALE non combina due tuple se queste hanno entrambe valori nulli su un attributo in comune.\\*
+
+Esempio:\\*
+	Impiegati:
+\begin{tabular}{|c|c|c|}
+		\hline 
+		codice & nome & uffici \\ 
+		\hline 
+		123 & Rossi & A12 \\ 
+		\hline 
+		231 & Verdi & NULL \\ 
+		\hline 
+		272 & '' & A27 \\ 
+		\hline 
+		435 & '' & NULL \\ 
+		\hline 
+		\end{tabular} 		
+		
+	Responsabili:
+		\begin{tabular}{|c|c|}
+		\hline 
+		ufficio & codice \\ 
+		\hline 
+		A12 & 123 \\ 
+		\hline 
+		A27 & NULL \\ 
+		\hline 
+		NULL & 231 \\ 
+		\hline 
+		\end{tabular} 		
+		
+\section{esercizi 18/10}
+Consideriamo la seguente porzione di BD:\\*
+\newline
+FORNITORE(\underline{CodForn}, nome, citt\'a)\\*
+PRODOTTI(\underline{CodProd}, nome, marca, modello)\\*
+CATALOGO(\underline{CodForn},\underline{CodProd}, Costo)\\*
+
+2) Trovare i nomi dei fornitori che distribuiscono prodotti di marca IBM:
+
+\begin{center}
+$ T _{1} \; \leftarrow \; \sigma _{marca=IBM} \, ( PRODOTTI \bowtie CATALOGO) $
+\end{center}
+
+3)Trovare i codici di tutti i prodotti che sono forniti da almeno 2 fornitori:\\*
+\underline{Idea:} Concateniamo due copie di catalogo su valori uguali dell'attributo codice prodotto e troviamo le tuple su cui i fornitori sono diversi.
+
+\begin{center}
+$COPIACATALOGO(codforn1, codforn2) \leftarrow \Pi _{codforn, prod} (CATALOGO) $\\
+$ T _{1} \; \leftarrow \; COPIACATALOGO \bowtie CATALOGO $\\
+$RIS \leftarrow \Pi ( \sigma _{codforn1, codforn2} (T1)$\\
+\end{center}
+
+4)Nomi dei fornitori che distribuiscono tutti i prodotti:\\
+\begin{center}
+$T1 \leftarrow ( \Pi _{codFor,codProd}(CATALOGO)) \div (\Pi _{codProd}(PRODOTTI))$\\
+$RIS \leftarrow \Pi ( T_{1} \bowtie FORNITORE )$\\
+\end{center}
+Oppure, senza usare la divisione:\\
+	//Tutte le coppie fornitore e prodotto
+\begin{center}
+$T_{1} \leftarrow	 \Pi _{codforn}(CATALOGO) \times \P _{codProd} (PRODOTTO)$\\
+$	//CodForn \notin T2 se cod_Forn fornisce tutti i prodotti.$\\
+$T_{2} \leftarrow \Pi(T_{1} - \Pi _{codForn,codProd} (CATALOGO))$\\
+$RIS \leftarrow \Pi _{codForn}(CATALOGO) - T2 $\\
+\end{center}
+
+
+STADIO(\underline{nome}, citt\'a, capienza)
+PARTITA(\underline{stadio, dato, ora}, squadra1, squadra2)
+SQUADRA(\underline{nazione}, continente, livello)
+
+1) Determinare gli stadi in cui non gioca alcuna squadra africana:\\*
+
+\begin{center}
+$AFRICA \leftarrow \Pi _{(nazione)}(\sigma _{(continente \neq africa)}(SQUADRA)))$
+$BAD \leftarrow \Pi _{(stadio)}(PARTITA \bowtie _{(nazione = squadra1 AND nazione = squadra2)} AFRICA)$
+$RIS \leftarrow \Pi _{(nome)}(STADIO) - BAD $
+\end{center}
+
+2)Determinare le squadre che incontrano soltanto squadre dello stesso livello:\\*
+
+\begin{center}
+\small
+SQUADRA1\_LIVELLO(S1, S2, L1) $\leftarrow \Pi _{(squadra1, squadra2, livello)}(PARTITA \bowtie_{(squadra1 = nazione)} SQUADRA $
+SQUADRA2\_LIVELLO(S1, S2, L1, l2) $\leftarrow \Pi _{(S1, S2,L1, livello)}(SQUADRA1\_LIVELLO \bowtie_{(S2 = nazione)} SQUADRA $
+$BAD1 \leftarrow \Pi _{(S1)}( \sigma _{L1 \not= L2}(SQUADRE\_LIVELLO)))$\\
+$BAD2 \leftarrow \Pi _{(S2)}( \sigma _{L1 \not= L2}(SQUADRE\_LIVELLO))$\\
+$RIS \leftarrow \Pi _{(nazione)}(squadra) - (BAD1 \cup BAD2)  $\\
+\end{center}
+\normalsize
+
+Sia dato il seguente schema relazione che descrive gli esami (obbligatori e non) in un anno ( I, II, III) 
+di un indirizzo di laurea triennale: \\*
+\newline
+CORSO(\underline{cod\_c}, nome, CFU, SSD)\\*
+INDIRIZZO(\underline{COD\_1}, titolo)\\*
+COMPOSIZIONE(\underline{COD\_I, COD\_C}, tipo, anno)\\*
+\newline
+
+1)Determinare i titoli dei corsi che in almeno un indirizzo possono essere collocati indifferentemente in ciascuno dei tra anni:\\
+
+\begin{center}
+$ANNO1(codc1,codI1) \leftarrow \Pi _{(codc,codI)} \sigma _{(anno = 1)}(COMPOSIZIONE)$\\
+$ANNO2(codc2,codI2) \leftarrow \Pi _{(codc,codI)} \sigma _{(anno = 2)}(COMPOSIZIONE)$\\
+$ANNO3(codc3,codI3) \leftarrow \Pi _{(codc,codI)} \sigma _{(anno = 3)}(COMPOSIZIONE)$\\
+$GOOD \leftarrow ( ANNO1 \bowtie _{(codc1 = codc2 AND codI1 = codI2)} ANNO2) \bowtie _{(codc2 = codc3 AND codI2 = codI3)} ANNO3)$\\
+$RISULTATO \leftarrow \Pi _{(TITOLO)}(GODD \bowtie _{(codc1 = codc)}CORSO)$\\
+\end{center}
+
+2)Determinare i titoli degli indirizzi che prevedono lo stesso insieme di esami obbligatori dell'indirizzo 'Sistemi'://
+
+Corsi obligatori dell'indirizzo sistemi\\
+\begin{center}
+$OBBSIST \leftarrow \Pi _{(codc)} (\sigma _{(TITOLO = sistemi AND tipo = obb)}(INDIRIZZO \bowtie COMPOSIZIONE))$
+\end{center}
+Tutti i corsi obbligatori\\
+$OBB \leftarrow \Pi _{(codI, codc)} (\sigma _{(tipo = obb)} (COMPOSIZIONE))$\\*
+indirizzi che non voglio nel risultato\\
+$\Pi in cod i ((pi in codi(indirizzi) x OBBSIST) - OBB) \cup \Pi _{codI} (OBB - (\Pi _{codI}(INDIRIZZI) \times OBBSIST))$\\
+
+
+\section{Calcolo relazionale sulle tuple (cap. 6.6 libro) \date{23/10}}
+A differenza del linguaggio relazione, il calcolo relazionale e' dichiarativo. \textit{Si dice quello che si vuole.} Il calcolo e' una base anche per il linguaggio SQL, perche' simile. Ha lo stesso potere espressivo dell'algebra relazionale di base. Si parla infatti di un linguaggio completo.\\*
+Il calcolo relazionale sulle tuple e' un linguaggio di interrogazione formale per il modello relazionale.
+
+
+\begin{itemize}
+\item[$\bullet$] dichiarativo;
+\item[$\bullet$] base per SQL;
+\item[$\bullet$] stesso potere espressivo dell'algebra relazionale di base;
+\end{itemize}
+\begin{center}
+DEFINIZIONE:[LINGUAGGIO COMPLETO] Un linguaggio L di interrogazione formale per il modello relazione e' detto completo se possiamo esprimere in L qualsiasi interrogazione esprimibile nel calcolo relazione.\\*
+\end{center}
+Esempio di calcolo relazionale sulle TUPLE:\\
+\textit{Si trovi la data di nascita e l'indirizzo dell'impiegato "John Smith".}\\*
+\begin{center}
+$ \lbrace$ t.DATA\_N, t.INDIRIZZO $|$ IMPIEGATO(t) AND t.NOME = "John" AND t.COGNOME = "Smith" $\rbrace$
+$\lbrace$Taget list	$|$	Espressione condizionale sulle variabili di tuple$\rbrace$\\*
+\end{center}
+
+\begin{center}
+DEFINIZIONE [ESPRESSIONE DEL CALCOLO RELAZIONALE]- SINTASSI:
+Un espressione del calcolo relazionale e' un'espressione del tipo\\*
+$\lbrace$ \textit{T} $|$ \textit{a} $\rbrace$
+Dove \textit{T} e' la target list (liste degli obbiettivi dell'interrogazione). In particolare:
+\begin{itemize}
+\item[$\bullet$] T e' una lista con elementi del tipo t.A dove t e' una variabile di tuple, A p un attributo della relazione sulle cui tuple prende valore t.
+\item[$\bullet$]se t1,...,tn sono le variabili di tipla in \textit{T}, allora \textit{a} = cond(t1,...,tn) e' una condizione.\\*
+\end{itemize}
+\end{center}
+
+Al fine di definire il concetto di formula del calcolo relazione, introduciamo le nozioni di atomi del calcolo relazionale: \\*
+\begin{center}
+DEFINIZIONINE[ATOMO CALCOLO RELAZIONE] SINTASSI:\\*
+Un atomo del calcolo relazionale e' una'espressione appartenente ad uno dei 3 tipi di espressioni elencate di seguito:\\* 
+\end{center}
+\begin{itemize}
+\item[$\bullet$]R(t) dove R e' un nome di relazione e t e' una variabile di tupla (ex. IMPIEGATO(t));
+\item[$\bullet$]$t_{i}.A \theta t_{j}.B dove \theta \in \lbrace =, <, >,<=,>= \rbrace$.\\*
+$t_{i}$ e' un attributo variabile di tupla ed A e' un attributo della relazione sulle cui tuple prende valore $t_{i}$. (risp $t_{j}$,B);
+\item[$\bullet$]$t_{i}.A \; \theta \mbox{ c dove }  \theta \; \in \, \lbrace =, <, >,<=,>= \rbrace $, t e' una variabile di tupla, c una costante, A ....;\\*
+\end{itemize}
+
+$\lbrace$ \textit{T} $|$ \textit{a} $\rbrace$
+Possiamo definire formalmente le formule del calcolo relazionale:\\*
+DEFINIZIONE[FORMULE CALC.REL]SINTASSI:\\*
+Una formula (o condizione) del calcolo relazionale e' definita induttivamente come segue
+1)ogni atomo del calcolo relazione e' una formula;
+2)Se $F_{1}, F_{2}$ sono formule, allora $F_{1} \wedge F_{2}$, $F_{1}\vee F_{2}$, $F_{1} \neg F_{2}$ sono formule;
+3) Se F e' una formula allora $\forall \, tF, \, \exists tF$ sono formule;\\*
+
+
+Seconda parte:\\
+
+Per poter definire il valore di verita' (semantica) delle formule del calcolo relazionale
+dobbiamo prima introdurre il concetto di variabile \textit{libera} o \textit{legata} in una formula.
+Intuitivamente, una variabile di tupla e' legata se è quantificata.\\*
+Formalmente, un'occorrenza di variabile di tupla t viene definita libera/legata nelle formule del calcolo relazionale F in base alle seguenti regole:
+\begin{itemize}
+\item[$\bullet$] Se F e' un atomo, ogni occorrenza di t è libera in F;
+\item[$\bullet$] Se $ F \in \lbrace F_{1} \wedge F_{2}, F_{1} \wedge F_{2}, \neg F_{1} \rbrace$ t è libera in F se t e' libera nella sottoforma $F_{1}F_{2} in cui compare$
+\item[$\bullet$] tutte le occorrenze di variabili t libere in F sono legate in $ \exists t.F , \forall t.F$\\*
+\end{itemize}
+
+ESEMPIO:\\
+$F_{1}: d.NOME\_D = 'Ricerca' \rightarrow d e' libera in F_{1}$
+$F_{2}\exists t ( d.numero = N\_D) \rightarrow d e' libero in F_{2}$
+$F_{3}: \forall d ( \exists t ( d.numero= t.N\_D)) \rightarrow d e' legata in T_{3}$
+
+
+DEFINIZIONE [FORMULE CALC REL] SEMANTICA
+
+Il valore di verita' di una formula del calcolo relazione è data dalle seguenti regole:\\*
+1) R(t) è vera se t è assegnata ad una tupla di R;\\*
+2) $t_{i} \wedge \theta t_{2} B è vera se ti, tj prendono valori su tuple tali che i valori degli attributi specificati stanno in realzioni \theta$;\\*
+3) $ F \in \lbrace F_{1} \wedge F_{2}, F_{1} \wedge F_{2}, \neg F_{1} \rbrace$ hanno l'usuale significato;\\*
+4) $\exists t.F $ ha valori di verita' vero se il valore della formula F e' vero per almeno una tupla assegnata ad occorrenze di t libere in F\\*
+5) $\forall T.F$ e' vero se F e' vera $\forall$ tupla assegnata ad occorrenze libere di t in F\\*
+
+Un'espressione $ \lbrace T | C \rbrace $t C del calcolo relazione restituisce la tupla (rispetto agli attributi nella target list) in cui a assume valore vero.\\
+
+
+ESERCIZI:\\*
+1) Trovare nome congnome degli impiegati che lavorano al dipartimento di ricerca:
+
+\begin{center}
+$ \lbrace \mbox{ t.NOME, t.COGNOME} | \mbox{IMPIEGATO(t)} \wedge \exists \mbox{d(DIPARTIMENTO(d)) } \wedge \mbox{d.nome = 'Ricerca '} \wedge  \mbox(NUMERO\_D = t.N\_D)$
+\end{center}
+
+2) Per ogni progetto con sedi a Stafford si elenchi il numero di progetto, il numero del dipartimento che lo gestisce, l'indirizzo, il nome e le date di nascita del direttore del dipartimento:
+
+\begin{center}
+$ \lbrace \mbox{p.NUMERO\_P, p.NUM\_D, t.COGNOME, t.DATA, t.INDIRIZZO} | \mbox{PROGETTO(t)} \wedge \mbox{IMPIEGATO(t) AND p.SedeP = 'Stafford' AND} \exists (\mbox{d(DIPARTIMENTO(d) AND d.SSN\_DIR = t.SSN AND d.NUMERO\_D = p.N\_D) }\rbrace$
+\end{center}
+Si noti che:
+\begin{itemize}
+\item[$\bullet$] variabili libere sono p, t;
+\item[$\bullet$] d è legata;
+la condizione C viene valutata per ogni coppia di tuple assegnata a p e t ovvero per ogni coppia di tuple assegnate a p e t si verifica che:
+	1) t sia un tupla di impiegato e p di progetto
+	2) se il progetto ha sedi a Stafford;
+	3) Se esiste un dipartimento il cui numero c MANCA ROBA (ha cancellato!!!)
+\end{itemize}
+
+
+
+\end{document}
