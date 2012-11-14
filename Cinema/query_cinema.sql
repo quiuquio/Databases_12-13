@@ -48,3 +48,58 @@ select titolo from film, persona
 --13)elencare i film (titolo) proiettati al cinema 'Le Fontanelle'
 select distinct titolo from film, proiezioni, cinema
     where proiezioni.id_film = film.id_film and cinema.id_cinema = proiezioni.id_cinema and nome = 'S.Angelo';
+
+--ESERCITAZIONE del 14 novembre:
+
+--1)Definire la lista di tutte le interpretazioni, specificando per ogni tupla: il nome ed il cognome dell'attore, il ruolo ed il titolo del film;
+-- il risultato in ordine alfabetico in base al cognome dell'attore.
+
+select nome, cognome, ruolo, titolo from persona, partecipazione, film 
+where partecipazione.id_film = film.id_film and persona.id_persona = partecipazione.id_attore 
+order by cognome ASC;
+
+--2) definire la lsita degli attori (NOME E COGNOME) specificando per ogniuno il numero di film interpretati. Il reisultato deve essere presentato in 
+-- ordine alfabetico rispetto ai cognomi;
+
+select nome, cognome, count(*) as quantita_film from persona, partecipazione 
+where persona.id_persona = partecipazione.id_attore 
+group by nome, cognome 
+order by cognome ASC;
+
+--3) Modificare la query precedente in modo da aggiungere al risultato due colonne per precisare:
+-- anno di produzione del primo film interpretato da ogni attore elencato nel ris della query e anno di produzione dell'ultimo film interpretato
+-- da ogni attore nella query.
+
+select nome, cognome, count(*) as quantita_film, MIN(film.anno), MAX(film.anno)
+from persona, partecipazione, film  
+where id_persona = id_attore and film.id_film = partecipazione.id_film 
+group by nome, cognome  
+order by cognome ASC;
+
+--4) Modificare la query precedente per tenere conto solo degli attori che hanno interpretato almeno due film
+select nome, cognome, count(*) as quantita_film, MIN(film.anno), MAX(film.anno)
+from persona, partecipazione, film  
+where id_persona = id_attore and film.id_film = partecipazione.id_film  
+group by nome, cognome  
+having count(distinct film.id_film) > 1 
+order by cognome ASC;
+
+--5) Elencare gli attori che hanno interpretato film drammatici e per ognuno di tali attori precisare il numero dei film drammatici
+-- interpretati
+
+select nome, cognome, count(*) as num_film_dramm 
+from persona, partecipazione, film 
+where id_persona = id_attore and film.genere = 'Drammatico' and partecipazione.id_film = film.id_film 
+group by nome, cognome;
+
+--6) Elenca i registi che hanno diretto sia film drammatici che commedie
+select distinct nome, cognome from persona join film on id_persona = id_regista 
+where genere = 'Drammatico'  
+INTERSECT 
+select distinct nome, cognome from persona join film on id_persona = id_regista 
+where genere = 'Commedia'; 
+
+--7) quanti film ha diretto ciscun regista nella BD???? (che curiosona che sei...)
+
+select distinct nome, cognome, count(*) from persona join film on id_persona = id_regista 
+group by nome, cognome;
